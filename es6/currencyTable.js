@@ -1,6 +1,7 @@
+const Currency = require("./currency").default;
 
 class CurrencyTable {
-    constructor(templateId) {
+    constructor({templateId, tableId}) {
         this.template = document.getElementById(templateId);
         if (!this.template) {
             throw "No Table template found";
@@ -9,8 +10,10 @@ class CurrencyTable {
         this.primaryKey = this.template.content.querySelector("tr").getAttribute("data-primarykey");
         this.sortByCol = this.template.content.querySelector("tr").getAttribute("data-sortby");
         
-        this.tableDOM = document.createElement("table");
-        document.body.appendChild(this.tableDOM);
+        this.currencies = []; // stores different currencies
+
+        this.tableDataDOM = document.createElement("tbody");
+        document.querySelector(`#${tableId}`).appendChild(this.tableDataDOM);
     }
 
     updateTable(tableData) {
@@ -21,29 +24,39 @@ class CurrencyTable {
         const rowIndex = this.findRowIndex(
             rowEl => rowEl.getAttribute("data-rowId") === tableData[this.primaryKey]
         );
-        if (rowIndex !== -1) {
-            console.log(`${tableData.name} already exists at ${rowIndex}`)
+        
+        if (rowIndex !== -1) { // delete row with existing currency
             this.deleteRow(rowIndex);
-        }
-
-        // find index of row with lowest maximum sortByCol attr value
+        } 
+       
+        // find index of row with least maximum sortByCol attr value
         const insertBeforeIndex = this.findRowIndex(
             rowEl => Number(rowEl.getAttribute("data-sortByVal")) > Number(tableData[this.sortByCol])
         );
         if(insertBeforeIndex === -1)
-            this.tableDOM.appendChild(rowTemplate);
+            this.tableDataDOM.appendChild(rowTemplate);
         else
-            this.tableDOM.insertBefore(rowTemplate, this.tableDOM.querySelectorAll('tr')[insertBeforeIndex]);
+            this.tableDataDOM.insertBefore(rowTemplate, this.tableDataDOM.querySelectorAll('tr')[insertBeforeIndex]);
+    }
+
+    // get or create Currency instance
+    getCurrency(name) {
+        let currency = this.currencies.find(c => c.name === name);
+        if(!currency) {
+            currency = new Currency(name);
+            this.currencies.push(currency);
+        }
+        return currency;
     }
 
     deleteRow(rowIndex) {
-        const rowEl = this.tableDOM.querySelectorAll('tr')[rowIndex];
+        const rowEl = this.tableDataDOM.querySelectorAll('tr')[rowIndex];
         if (rowEl)
             rowEl.remove();
     }
 
     findRowIndex(searchFn) {
-        const allRowEls = this.tableDOM.querySelectorAll('tr');
+        const allRowEls = this.tableDataDOM.querySelectorAll('tr');
         return [].findIndex.call(allRowEls, searchFn);
     }
 
@@ -54,8 +67,24 @@ class CurrencyTable {
         const cols = rowEl.children;
         [].forEach.call(cols, col => {
             const colId = col.getAttribute("data-colid");
-            col.innerText = tableData[colId] || "";
+            if(colId)
+                col.innerText = tableData[colId] || "";
         });
+        let currency = null;
+
+        currency = this.getCurrency(tableData[this.primaryKey]);
+        currency.setValue(tableData);
+
+        // Draw graph at .sparkline
+        const options = {
+            width: 150,
+            startColor: "blue",
+            endColor: "orange",
+            maxColor: "green",
+            minColor: "red",
+            tooltip: (val, index, arr) => `${val}`
+        };
+        Sparkline.draw(rowTemplate.querySelector('.sparkline'), currency.getSparklineData(), options)
 
         // set rowID for newly created row
         const rowId = tableData[this.primaryKey];

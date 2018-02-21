@@ -5,6 +5,21 @@
         <script src="sparkline.js"></script>
     </head>
     <body>
+        <table id="currency-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Best Bid</th>
+                    <th>Best Ask</th>
+                    <th>Open Bid</th>
+                    <th>Open Ask</th>
+                    <th>Last Ask Change</th>
+                    <th>Last Bid Chnage</th>
+                    <th>Graph</th>
+                </tr>
+            </thead>
+        </table>
+
         <template id="stock-table">
             <tr data-primarykey="name" data-sortby="lastChangeBid">
                 <td data-colid="name"></td>
@@ -14,8 +29,11 @@
                 <td data-colid="openAsk"></td>
                 <td data-colid="lastChangeAsk"></td>
                 <td data-colid="lastChangeBid"></td>
+                <td class="sparkline"></td>
             </tr>
         </template>
+
+        
         <script src="./bundle.js"></script>
     </body>
 </html>
