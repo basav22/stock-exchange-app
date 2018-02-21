@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <title>App</title>
+        <script src="stomp.js"></script>
+        <script src="sparkline.js"></script>
+    </head>
+    <body>
+        <template id="stock-table">
+            <tr data-primarykey="name" data-sortby="lastChangeBid">
+                <td data-colid="name"></td>
+                <td data-colid="bestBid"></td>
+                <td data-colid="bestAsk"></td>
+                <td data-colid="openBid"></td>
+                <td data-colid="openAsk"></td>
+                <td data-colid="lastChangeAsk"></td>
+                <td data-colid="lastChangeBid"></td>
+            </tr>
+        </template>
+        <script src="./bundle.js"></script>
+    </body>
+</html>
